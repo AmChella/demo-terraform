@@ -18,7 +18,7 @@ terraform {
     organization = "Chellas-Tech-Park"
 
     workspaces {
-      name = "learn-terraform-github-actions"
+      name = "Demo-Setup"
     }
   }
 }
