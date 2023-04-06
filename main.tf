@@ -15,7 +15,7 @@ terraform {
   required_version = ">= 1.1.0"
 
   cloud {
-    organization = "Chellas-Tech-Park "
+    organization = "Chellas-Tech-Park"
 
     workspaces {
       name = "learn-terraform-github-actions"
