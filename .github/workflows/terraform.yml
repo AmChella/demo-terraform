@@ -16,8 +16,6 @@ jobs:
     environment:
       name: deploy.prod
       url: https://abel-node-gh-accelerator.azurewebsites.net
-    name: "Terraform"
-    runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
