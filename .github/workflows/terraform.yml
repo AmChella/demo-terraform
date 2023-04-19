@@ -6,7 +6,7 @@ jobs:
   terraform:
     name: Provision Prod
     runs-on: ubuntu-latest
-    environment: deploy.prod
+    environment: deploy.stages
     permissions:
       pull-requests: read
       
