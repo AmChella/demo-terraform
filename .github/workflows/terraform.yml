@@ -19,11 +19,19 @@ jobs:
       - name: Compile
         run: |
           echo Build completed
+          ls -l
+
+      - run: mkdir -p ./artifacts
+
+      - name: Moving all files to artifacts
+        run: |
+          cp ./Dockerfile ./artifacts
+          cp ./main.tf ./artifacts
       
       - uses: actions/upload-artifact@v3
         with:
           name: my-artifact
-          path: .
+          path: ./artifacts
           if-no-files-found: error
   
   Deploy2Dev:
@@ -36,7 +44,7 @@ jobs:
       url: 'https://dev.happycode.today'
 
     steps:
-      - name: Configures AWS credentials
+      - name: AWS Login
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -52,7 +60,8 @@ jobs:
           name: my-artifact
     
       - name: Display structure of downloaded files
-        run: ls -R
+        run: |
+          ls -R
 
       - name: Build Image
         run: |
@@ -85,7 +94,8 @@ jobs:
           name: my-artifact
     
       - name: Display structure of downloaded files
-        run: ls -R
+        run: |
+          ls -R
 
       - name: Build Image
         run: |
@@ -117,7 +127,8 @@ jobs:
           name: my-artifact
     
       - name: Display structure of downloaded files
-        run: ls -R
+        run: |
+          ls -R
 
       - name: Build Image
         run: |
