@@ -24,7 +24,7 @@ jobs:
 
       - name: Moving all files to artifacts
         run: |
-          cp -rf . ./artifacts/
+          cp -rf ./* ./artifacts
       
       - uses: actions/upload-artifact@v3
         with:
@@ -60,7 +60,7 @@ jobs:
       - name: Display structure of downloaded files
         run: |
           ls -R
-          cp -rf ./artifacts .
+          cp -rf ./artifacts/* .
 
       - name: Build Image
         run: |
@@ -95,7 +95,7 @@ jobs:
       - name: Display structure of downloaded files
         run: |
           ls -R
-          cp -rf ./artifacts .
+          cp -rf ./artifacts/* .
 
       - name: Build Image
         run: |
@@ -129,7 +129,7 @@ jobs:
       - name: Display structure of downloaded files
         run: |
           ls -R
-          cp -rf ./artifacts .
+          cp -rf ./artifacts/* .
 
       - name: Build Image
         run: |
