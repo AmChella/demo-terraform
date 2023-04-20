@@ -20,12 +20,16 @@ jobs:
         run: |
           echo Build completed
 
-      - run: mkdir -p artifacts
+      - run: mkdir -p ./artifacts
+
+      - name: Moving all files to artifacts
+        run: |
+          cp -rf . ./artifacts/
       
       - uses: actions/upload-artifact@v3
         with:
           name: my-artifact
-          path: artifacts
+          path: ./artifacts
           if-no-files-found: error
   
   Deploy2Dev:
@@ -54,7 +58,9 @@ jobs:
           name: my-artifact
     
       - name: Display structure of downloaded files
-        run: ls -R
+        run: |
+          ls -R
+          cp -rf ./artifacts .
 
       - name: Build Image
         run: |
@@ -87,7 +93,9 @@ jobs:
           name: my-artifact
     
       - name: Display structure of downloaded files
-        run: ls -R
+        run: |
+          ls -R
+          cp -rf ./artifacts .
 
       - name: Build Image
         run: |
@@ -119,7 +127,9 @@ jobs:
           name: my-artifact
     
       - name: Display structure of downloaded files
-        run: ls -R
+        run: |
+          ls -R
+          cp -rf ./artifacts .
 
       - name: Build Image
         run: |
