@@ -19,10 +19,13 @@ jobs:
       - name: Compile
         run: |
           echo Build completed
+
+      - run: mkdir -p artifacts
       
       - uses: actions/upload-artifact@v3
         with:
           name: my-artifact
+          path: artifacts
           if-no-files-found: error
   
   Deploy2Dev:
