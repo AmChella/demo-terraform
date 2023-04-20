@@ -62,7 +62,6 @@ jobs:
       - name: Display structure of downloaded files
         run: |
           ls -R
-          cp -rf ./artifacts/* .
 
       - name: Build Image
         run: |
@@ -97,7 +96,6 @@ jobs:
       - name: Display structure of downloaded files
         run: |
           ls -R
-          cp -rf ./artifacts/* .
 
       - name: Build Image
         run: |
@@ -131,7 +129,6 @@ jobs:
       - name: Display structure of downloaded files
         run: |
           ls -R
-          cp -rf ./artifacts/* .
 
       - name: Build Image
         run: |
