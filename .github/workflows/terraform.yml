@@ -70,7 +70,7 @@ jobs:
 
   Deploy2Stage:
     name: Deploy to Stage
-    if: github.event.ref == 'ref/heads/main'
+    if: github.event.ref == 'refs/heads/main'
     needs: [Build]
     runs-on: ubuntu-latest
     environment:
@@ -103,7 +103,7 @@ jobs:
           docker push ${{ steps.login-ecr.outputs.registry }}/test-stage:latest
 
   Deploy2Prod:
-    name: Deploy to Stage
+    name: Deploy to Prod
     needs: [Deploy2Stage]
     runs-on: ubuntu-latest
     environment:
