@@ -19,11 +19,13 @@ jobs:
       - name: Compile
         run: |
           echo Build completed
+          ls -l
 
       - run: mkdir -p ./artifacts
 
       - name: Moving all files to artifacts
         run: |
+          ls -l
           cp -rf ./* ./artifacts
       
       - uses: actions/upload-artifact@v3
