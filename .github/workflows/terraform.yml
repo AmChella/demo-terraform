@@ -1,25 +1,41 @@
 name: "Terraform"
 
-on:  [workflow_dispatch]
+on:  
+  push: 
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  terraform:
-    name: Provision Prod
-    runs-on: ubuntu-latest
-    environment: deploy.stages
-    permissions:
-      pull-requests: read
-      
+  Build:
+    runs-on: ubuntu-latest    
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Compile
+        run: |
+          echo Build completed
+  
+  Deploy2Dev:
+    name: Deploy to Dev Environment
+    if: github.event_name == 'pull_request'
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: Dev
+      url: 'https://dev.happycode.today'
+
+    steps:
       - name: Configures AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -27,8 +43,59 @@ jobs:
 
       - name: Build Image
         run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/test-i:latest .
-          docker push ${{ steps.login-ecr.outputs.registry }}/test-i:latest
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/test-dev:latest .
+          docker push ${{ steps.login-ecr.outputs.registry }}/test-dev:latest
+
+  Deploy2Stage:
+    name: Deploy to Stage
+    if: github.event.ref == 'ref/heads/main'
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: Stage
+      url: 'https://stage.happycode.tech'
+
+    steps:
+      - name: Configures AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Image
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/test-stage:latest .
+          docker push ${{ steps.login-ecr.outputs.registry }}/test-stage:latest
+
+  Deploy2Prod:
+    name: Deploy to Stage
+    needs: [Deploy2Stage]
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: 'https://happycode.com'
+
+    steps:
+      - name: Configures AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Image
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/test-prod:latest .
+          docker push ${{ steps.login-ecr.outputs.registry }}/test-prod:latest
 
       # - name: Setup Terraform
       #   uses: hashicorp/setup-terraform@v2
