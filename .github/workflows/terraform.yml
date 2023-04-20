@@ -25,8 +25,8 @@ jobs:
 
       - name: Moving all files to artifacts
         run: |
-          ls -l
-          cp -rf ./* ./artifacts
+          cp ./Dockerfile ./artifacts
+          cp ./main.tf ./artifacts
       
       - uses: actions/upload-artifact@v3
         with:
