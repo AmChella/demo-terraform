@@ -21,18 +21,18 @@ jobs:
           echo Build completed
           ls -l
 
-      - run: mkdir -p ./artifacts
+      # - run: mkdir -p ./artifacts
 
-      - name: Moving all files to artifacts
-        run: |
-          cp ./Dockerfile ./artifacts
-          cp ./main.tf ./artifacts
+      # - name: Moving all files to artifacts
+      #   run: |
+      #     cp ./Dockerfile ./artifacts
+      #     cp ./main.tf ./artifacts
       
-      - uses: actions/upload-artifact@v3
-        with:
-          name: my-artifact
-          path: ./artifacts
-          if-no-files-found: error
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: my-artifact
+      #     path: ./artifacts
+      #     if-no-files-found: error
   
   Deploy2Dev:
     name: Deploy to Dev Environment
@@ -55,9 +55,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: my-artifact
+      # - uses: actions/download-artifact@v3
+      #   with:
+      #     name: my-artifact
     
       - name: Display structure of downloaded files
         run: |
@@ -89,9 +89,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: my-artifact
+      # - uses: actions/download-artifact@v3
+      #   with:
+      #     name: my-artifact
     
       - name: Display structure of downloaded files
         run: |
@@ -122,9 +122,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: my-artifact
+      # - uses: actions/download-artifact@v3
+      #   with:
+      #     name: my-artifact
     
       - name: Display structure of downloaded files
         run: |
