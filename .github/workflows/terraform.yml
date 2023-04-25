@@ -80,8 +80,8 @@ jobs:
       - name: Display structure of downloaded files
         run: |
           ls -R
-
-      - run: |
+      - name: Deploy
+        run: |
           echo "Log level: $LEVEL"
           echo "Tags: $TAGS"
           echo "Environment: $ENVIRONMENT"
@@ -120,7 +120,7 @@ jobs:
           ls -R
 
       - name: Build Image
-      - run: |
+        run: |
           echo "Log level: $LEVEL"
           echo "Tags: $TAGS"
           echo "Environment: $ENVIRONMENT"
@@ -158,7 +158,7 @@ jobs:
           ls -R
 
       - name: Build Image
-      - run: |
+        run: |
           echo "Log level: $LEVEL"
           echo "Tags: $TAGS"
           echo "Environment: $ENVIRONMENT"
