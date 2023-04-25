@@ -33,11 +33,11 @@ jobs:
           echo Build completed
           ls -l
 
-      - run: mkdir -p ${{GITHUB_PATH}}/artifacts
+      - run: mkdir -p $GITHUB_WORKSPACE/artifacts
 
       - name: Moving all files to artifacts
         run: |
-          rsync -av --exclude=.git . ${{GITHUB_PATH}}/artifacts
+          rsync -av --exclude=.git . $GITHUB_WORKSPACE/artifacts
       
       - uses: actions/upload-artifact@v3
         with:
