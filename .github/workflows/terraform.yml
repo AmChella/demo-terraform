@@ -1,12 +1,6 @@
 name: "Terraform"
 
 on:  
-  push: 
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       logLevel:
@@ -39,17 +33,16 @@ jobs:
           echo Build completed
           ls -l
 
-      - run: mkdir -p ./artifacts
+      - run: mkdir -p ${{GITHUB_PATH}}/artifacts
 
       - name: Moving all files to artifacts
         run: |
-          cp ./Dockerfile ./artifacts
-          cp ./main.tf ./artifacts
+          rsync -av --exclude=.git . ${{GITHUB_PATH}}/artifacts
       
       - uses: actions/upload-artifact@v3
         with:
           name: my-artifact
-          path: ./artifacts
+          path: ${{GITHUB_PATH}}/artifacts
           if-no-files-found: error
   
   Deploy2Dev:
