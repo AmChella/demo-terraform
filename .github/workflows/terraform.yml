@@ -81,10 +81,14 @@ jobs:
         run: |
           ls -R
 
-      - name: Build Image
-        run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/test-dev:latest .
-          docker push ${{ steps.login-ecr.outputs.registry }}/test-dev:latest
+      - run: |
+          echo "Log level: $LEVEL"
+          echo "Tags: $TAGS"
+          echo "Environment: $ENVIRONMENT"
+        env:
+          LEVEL: ${{ inputs.logLevel }}
+          TAGS: ${{ inputs.tags }}
+          ENVIRONMENT: ${{ inputs.environment }}
 
   Deploy2Stage:
     name: Deploy to Stage
@@ -116,9 +120,14 @@ jobs:
           ls -R
 
       - name: Build Image
-        run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/test-stage:latest .
-          docker push ${{ steps.login-ecr.outputs.registry }}/test-stage:latest
+      - run: |
+          echo "Log level: $LEVEL"
+          echo "Tags: $TAGS"
+          echo "Environment: $ENVIRONMENT"
+        env:
+          LEVEL: ${{ inputs.logLevel }}
+          TAGS: ${{ inputs.tags }}
+          ENVIRONMENT: ${{ inputs.environment }}
 
   Deploy2Prod:
     name: Deploy to Prod
@@ -149,9 +158,14 @@ jobs:
           ls -R
 
       - name: Build Image
-        run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/test-prod:latest .
-          docker push ${{ steps.login-ecr.outputs.registry }}/test-prod:latest
+      - run: |
+          echo "Log level: $LEVEL"
+          echo "Tags: $TAGS"
+          echo "Environment: $ENVIRONMENT"
+        env:
+          LEVEL: ${{ inputs.logLevel }}
+          TAGS: ${{ inputs.tags }}
+          ENVIRONMENT: ${{ inputs.environment }}
 
       # - name: Setup Terraform
       #   uses: hashicorp/setup-terraform@v2
