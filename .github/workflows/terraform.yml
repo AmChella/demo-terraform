@@ -32,7 +32,7 @@ jobs:
         run: |
           echo Build completed
           ls -l
-
+          echo $GITHUB_REF_NAME
       - run: mkdir -p $GITHUB_WORKSPACE/artifacts
 
       - name: Moving all files to artifacts
