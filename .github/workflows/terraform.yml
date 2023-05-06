@@ -14,7 +14,7 @@ on:
         - debug
       tags:
         description: 'Test scenario tags'
-        required: false
+        required: true
         type: boolean
       environment:
         description: 'Environment to run tests against'
