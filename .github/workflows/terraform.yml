@@ -47,7 +47,6 @@ jobs:
           secret: ${{ github.TOKEN }}
           approvers: AmChella, naveenkumardt
           minimum-approvals: 1
-          timeout-minutes : 10
       
       - uses: actions/upload-artifact@v3
         with:
