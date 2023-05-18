@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: Dev
-      url: 'https://dev.happycode.today'
+      url: 'https://dev.happycodee.today'
 
     steps:
     
