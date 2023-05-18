@@ -1,4 +1,4 @@
-[![Terraform](https://github.com/AmChella/demo-terraform/actions/workflows/terraform.yml/badge.svg)](https://github.com/AmChella/demo-terraform/actions/workflows/terraform.yml)
+[![DemoTerraform](https://github.com/AmChella/demo-terraform/actions/workflows/terraform.yml/badge.svg)](https://github.com/AmChella/demo-terraform/actions/workflows/terraform.yml)
 
 # Automate Terraform with GitHub Actions
 
