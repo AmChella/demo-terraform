@@ -20,10 +20,13 @@ on:
         description: 'Environment to run tests against'
         type: environment
         required: true
+  pull_request_review:
+    types: [submitted]
 env: 
   version: $GITHUB_REF_NAME
 jobs:
   Build:
+    if: github.event.pull_request.state == "approved":
     runs-on: ubuntu-latest    
     steps:
       - name: Checkout
