@@ -10,7 +10,7 @@ jobs:
         stages: ['live', 'stage', 'test']
     steps:
       - name: live command
-        run:|
+        run: |
           if [[ ${{matix.stages -e 'live' ]]; then
             echo "Live"
           
