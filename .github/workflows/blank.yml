@@ -9,13 +9,9 @@ jobs:
       matrix:
         stages: ['live', 'stage', 'test']
     steps:
-      if: ${{matrix.stages == 'live'}}
       - name: live command
-        command: echo "live"
-      
-      if: ${{matrix.stages == 'test'}}
-      - name: test command
-        command: echo "test"
-      
-      
-  
+        run: |
+          if [[ ${{matix.stages -e 'live' ]]; then
+            echo "Live"
+          
+          
