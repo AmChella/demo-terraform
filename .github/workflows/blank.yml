@@ -1,6 +1,6 @@
 name: test matrix runner
 on:
-  workflow_push:
+  workflow_dispatch:
 
 jobs:
   build:
