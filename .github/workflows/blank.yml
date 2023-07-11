@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: live command
         run: |
-          if [[ ${{matix.stages}} -e 'live' ]]; then
+          if [[ ${{matrix.stages}} -e 'live' ]]; then
             echo "Live"
           fi
           
