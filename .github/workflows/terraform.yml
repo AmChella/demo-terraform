@@ -22,6 +22,9 @@ on:
         required: true
   pull_request_review:
     types: [submitted]
+  push:
+    tags:
+      - "*"
 env: 
   version: $GITHUB_REF_NAME
 jobs:
