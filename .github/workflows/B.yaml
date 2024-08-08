@@ -4,7 +4,7 @@ on:
     outputs:
       env:
         description: 'Hi TMS'
-        value: ${{BTask.env.value}}
+        value: ${{jobs.BTask.outputs.value}}
 
 jobs:
   BTask:
