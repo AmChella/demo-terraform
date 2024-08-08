@@ -1,0 +1,13 @@
+name: Workflow C
+on:
+  workflow_call:
+
+jobs:
+  CTask:
+    name: Workflow C
+    runs-on: ubuntu-latest
+    step1:
+        - name: Running workflow C
+        uses: actions/checkout@v4
+        run: |
+            echo "Hello Im workflow C!"
