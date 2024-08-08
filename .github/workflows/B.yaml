@@ -9,6 +9,10 @@ jobs:
     steps:
       - name: Using Checkout @v4
         uses: actions/checkout@v4
+
       - name: Running Workflow B
+        id: env
         run: |
           echo "Hello Im workflow B!"
+    outputs:
+      env: "stage"
