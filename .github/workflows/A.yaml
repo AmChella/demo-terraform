@@ -7,5 +7,6 @@ jobs:
     name: Calling Workflow B
     uses: ./.github/workflows/B.yaml
   WB:
-    name: Calling Workflow C
+    needs: [WA]
+    name: Calling Workflow C - ${{ needs.WA.outputs.env }}
     uses: ./.github/workflows/C.yaml
