@@ -1,0 +1,11 @@
+name: Workflow A
+on:
+  workflow_dispatch:
+
+jobs:
+  step1:
+    name: Calling Workflow B
+    uses: ./.github/workflows/B.yaml
+  step2:
+    name: Calling Workflow C
+    uses: ./.github/workflows/C.yaml

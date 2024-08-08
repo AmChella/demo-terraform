@@ -1,0 +1,14 @@
+name: Workflow B
+on:
+  workflow_call:
+
+jobs:
+  BTask:
+    name: Workflow B
+    runs-on: ubuntu-latest
+    step1:
+        - name: Running workflow B
+        uses: actions/checkout@v4
+        run: |
+            echo "Hello Im workflow B!"
+
