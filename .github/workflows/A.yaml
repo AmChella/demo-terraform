@@ -3,8 +3,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  name: Workflow A
-  runs-on: ubuntu-latest
   WA:
     name: Calling Workflow B
     uses: ./.github/workflows/B.yaml
