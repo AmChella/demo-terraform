@@ -8,5 +8,5 @@ jobs:
     uses: ./.github/workflows/B.yaml
   WB:
     needs: [WA]
-    name: Calling Workflow C - ${{ needs.WA.outputs.env }}
+    name: Calling Workflow C - ${{ needs.BTask.outputs.env }}
     uses: ./.github/workflows/C.yaml
