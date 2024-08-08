@@ -2,8 +2,9 @@ name: Workflow B
 on:
   workflow_call:
     outputs:
-      description: 'Hi TMS'
-      value: ${{BTask.env.value}}
+      env:
+        description: 'Hi TMS'
+        value: ${{BTask.env.value}}
 
 jobs:
   BTask:
