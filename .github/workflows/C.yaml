@@ -6,8 +6,9 @@ jobs:
   CTask:
     name: Workflow C
     runs-on: ubuntu-latest
-    step1:
-        - name: Running workflow C
+    steps:
+      - name: Using Checkout @v4
         uses: actions/checkout@v4
+      - name: Running Workflow C
         run: |
-            echo "Hello Im workflow C!"
+          echo "Hello Im workflow C!"

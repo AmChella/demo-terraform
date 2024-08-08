@@ -6,9 +6,9 @@ jobs:
   BTask:
     name: Workflow B
     runs-on: ubuntu-latest
-    step1:
-        - name: Running workflow B
+    steps:
+      - name: Using Checkout @v4
         uses: actions/checkout@v4
+      - name: Running Workflow B
         run: |
-            echo "Hello Im workflow B!"
-
+          echo "Hello Im workflow B!"

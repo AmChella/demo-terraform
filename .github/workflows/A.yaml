@@ -3,9 +3,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  step1:
+  name: Workflow A
+  runs-on: ubuntu-latest
+  WA:
     name: Calling Workflow B
     uses: ./.github/workflows/B.yaml
-  step2:
+  WB:
     name: Calling Workflow C
     uses: ./.github/workflows/C.yaml
