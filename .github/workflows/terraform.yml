@@ -28,8 +28,8 @@ jobs:
     steps:
       - name: Test
         run: |
-          echo "Tag:" ${{ needs.Build.sha_id.outputs.tag }}
-          echo "Tag Sha:" ${{SHORT_SHA}}
+          echo "Tag:" ${{ needs.Build.outputs.tag }}
+          echo "Tag Sha:" $SHORT_SHA
         
   
   # Audit:
