@@ -15,10 +15,7 @@ jobs:
         id: sha_id
         run: |
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "IMAGE_TAG=$SHORT_SHA" >> $GITHUB_OUTPUT
-          ls -l
-          V=$(echo $GITHUB_REF_NAME | sed 's/\//_/')
-          echo $V
+          echo $SHORT_SHA
     outputs:
       tag: ${{ steps.env.outputs.SHORT_SHA }}
       
