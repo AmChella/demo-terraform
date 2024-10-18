@@ -15,9 +15,10 @@ jobs:
         id: sha_id
         run: |
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo git rev-parse --short HEAD
           echo $SHORT_SHA
     outputs:
-      tag: ${{ steps.env.outputs.SHORT_SHA }}
+      tag: ${{ steps.sha_id.outputs.SHORT_SHA }}
       
   Test:
     needs: [Build]
