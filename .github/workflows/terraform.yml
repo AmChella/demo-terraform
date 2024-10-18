@@ -30,7 +30,7 @@ env:
 jobs:
   Build:
     #if: github.event.review.state == 'approved'
-    if: github.ref_type == 'tag'
+    # if: github.ref_type == 'tag'
     runs-on: ubuntu-latest    
     steps:
       - name: Checkout
@@ -58,7 +58,7 @@ jobs:
           if-no-files-found: error
   
   Audit:
-    if: github.ref_type == 'tag'
+    # if: github.ref_type == 'tag'
     needs: [Build]
     runs-on: ubuntu-latest
     environment:
@@ -75,7 +75,7 @@ jobs:
   
   Deploy2Dev:
     name: Deploy to Dev Environment
-    if: github.event.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    # if: github.event.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     needs: [Build]
     runs-on: ubuntu-latest
     environment:
@@ -113,7 +113,7 @@ jobs:
 
   Deploy2Stage:
     name: Deploy to Stage
-    if: github.event.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    # if: github.event.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     needs: [Build]
     runs-on: ubuntu-latest
     environment:
