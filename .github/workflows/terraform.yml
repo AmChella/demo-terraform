@@ -2,31 +2,6 @@ name: "Terraform"
 
 on:  
   workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'warning'
-        type: choice
-        options:
-        - info
-        - warning
-        - debug
-      tags:
-        description: 'Test scenario tags'
-        required: true
-        type: boolean
-      environment:
-        description: 'Environment to run tests against'
-        type: environment
-        required: true
-  pull_request_review:
-    types: [submitted]
-  push:
-    tags:
-      - "*"
-env: 
-  version: $GITHUB_REF_NAME
 jobs:
   Build:
     #if: github.event.review.state == 'approved'
@@ -46,14 +21,15 @@ jobs:
           echo $V
     outputs:
       tag: ${{ steps.env.outputs.SHORT_SHA }}
+      
   Test:
     needs: [Build]
     runs-on: ubuntu-latest
     steps:
       - name: Test
         run: |
-          ls -R
-          echo ${{ needs.Build.sha_id.outputs.tag }}
+          echo "Tag:" ${{ needs.Build.sha_id.outputs.tag }}
+          echo "Tag Sha:" ${{SHORT_SHA}}
         
   
   # Audit:
