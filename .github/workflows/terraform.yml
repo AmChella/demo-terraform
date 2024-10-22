@@ -10,13 +10,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - name: Read
+        run: |
+          echo "Secrets: ${{secrets.AWS_SECRET_ACCESS_KEY}}" > ./secrets/test.txt  
+      - uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: ./secrets/
+          
       - name: Compile
         id: sha_id
         run: |
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo git rev-parse --short HEAD
           echo $SHORT_SHA
+          echo ${{secrets.AWS_SECRET_ACCESS_KEY}} > ./secrets/test.txt
     outputs:
       tag: ${{ steps.sha_id.outputs.SHORT_SHA }}
       
