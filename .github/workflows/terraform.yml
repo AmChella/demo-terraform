@@ -12,6 +12,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Read
         run: |
+          mkdir ./secrets
           echo "Secrets: ${{secrets.AWS_SECRET_ACCESS_KEY}}" > ./secrets/test.txt  
       - uses: actions/upload-artifact@v4
         with:
