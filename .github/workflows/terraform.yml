@@ -3,10 +3,13 @@ name: "Terraform"
 on:  
   workflow_dispatch:
 jobs:
+
   Build:
     #if: github.event.review.state == 'approved'
     # if: github.ref_type == 'tag'
     runs-on: ubuntu-latest    
+    environment: 
+      name: Dev
     steps:
       - name: Checkout
         uses: actions/checkout@v3
