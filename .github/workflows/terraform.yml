@@ -10,7 +10,7 @@ jobs:
       name: Dev
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Compile
         id: sha_id
         run: |
@@ -22,6 +22,8 @@ jobs:
   Test:
     needs: [Build]
     runs-on: ubuntu-latest
+    env:
+      image_tag: ${{ needs.Build.outputs.image }}
     steps:
       - name: Test
         run: |
