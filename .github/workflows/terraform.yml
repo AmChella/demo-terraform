@@ -5,8 +5,6 @@ on:
 jobs:
 
   Build:
-    #if: github.event.review.state == 'approved'
-    # if: github.ref_type == 'tag'
     runs-on: ubuntu-latest    
     environment: 
       name: Dev
@@ -14,21 +12,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Read
-        run: |
-          mkdir ./secrets
-          echo "Secrets: ${{secrets.AWS_SECRET_ACCESS_KEY}}" > ./secrets/test.txt  
-      - uses: actions/upload-artifact@v4
-        with:
-          name: my-artifact
-          path: ./secrets/
-          
       - name: Compile
         id: sha_id
         run: |
-          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo git rev-parse --short HEAD
-          echo $SHORT_SHA
-          echo ${{secrets.AWS_SECRET_ACCESS_KEY}} > ./secrets/test.txt
+          echo "SHORT_SHA=sha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
     outputs:
       tag: ${{ steps.sha_id.outputs.SHORT_SHA }}
       
@@ -39,136 +26,5 @@ jobs:
       - name: Test
         run: |
           echo "Tag:" ${{ needs.Build.outputs.tag }}
-          echo "Tag Sha:" $SHORT_SHA
-        
-  
-  # Audit:
-  #   # if: github.ref_type == 'tag'
-  #   needs: [Build]
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: Dev
-  #   steps:
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: my-artifact
-  #     - name: SonarCloud Scan
-  #       uses: SonarSource/sonarcloud-github-action@master
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  
-  # Deploy2Dev:
-  #   name: Deploy to Dev Environment
-  #   # if: github.event.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
-  #   needs: [Build]
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: Dev
-  #     url: 'https://dev.happycodee.today'
-
-  #   steps:
-  #     - name: AWS Login
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ vars.AWS_REGION }}
-
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v1
-
-  #     # - uses: actions/download-artifact@v3
-  #     #   with:
-  #     #     name: my-artifact
-    
-  #     - name: Display structure of downloaded files
-  #       run: |
-  #         ls -R
-  #     - name: Deploy
-  #       run: |
-  #         echo "Log level: $LEVEL"
-  #         echo "Tags: $TAGS"
-  #         echo "Environment: $ENVIRONMENT"
-  #       env:
-  #         LEVEL: ${{ inputs.logLevel }}
-  #         TAGS: ${{ inputs.tags }}
-  #         ENVIRONMENT: ${{ inputs.environment }}
-
-  # Deploy2Stage:
-  #   name: Deploy to Stage
-  #   # if: github.event.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
-  #   needs: [Build]
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: Stage
-  #     url: 'https://stage.happycode.tech'
-
-  #   steps:
-  #     - name: Configures AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ vars.AWS_REGION }}
-
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v1
-
-  #     # - uses: actions/download-artifact@v3
-  #     #   with:
-  #     #     name: my-artifact
-    
-  #     - name: Display structure of downloaded files
-  #       run: |
-  #         ls -R
-
-  #     - name: Build Image
-  #       run: |
-  #         echo "Log level: $LEVEL"
-  #         echo "Tags: $TAGS"
-  #         echo "Environment: $ENVIRONMENT"
-  #       env:
-  #         LEVEL: ${{ inputs.logLevel }}
-  #         TAGS: ${{ inputs.tags }}
-  #         ENVIRONMENT: ${{ inputs.environment }}
-
-  # Deploy2Prod:
-  #   name: Deploy to Prod
-  #   needs: [Deploy2Stage]
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: Production
-  #     url: 'https://happycode.com'
-
-  #   steps:
-  #     - name: Configures AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ vars.AWS_REGION }}
-
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v1
-
-  #     # - uses: actions/download-artifact@v3
-  #     #   with:
-  #     #     name: my-artifact
-    
-  #     - name: Display structure of downloaded files
-  #       run: |
-  #         ls -R
-  #         echo $SHORT_SHA
-  #     - name: Build Image
-  #       run: |
-  #         echo "Log level: $LEVEL"
-  #         echo "Tags: $TAGS"
-  #         echo "Environment: $ENVIRONMENT"
-  #       env:
-  #         LEVEL: ${{ inputs.logLevel }}
-  #         TAGS: ${{ inputs.tags }}
-  #         ENVIRONMENT: ${{ inputs.environment }}
+          
+          
