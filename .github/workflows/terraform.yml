@@ -17,6 +17,7 @@ jobs:
           echo "SHORT_SHA=sha-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
     outputs:
       tag: ${{ steps.sha_id.outputs.SHORT_SHA }}
+      image: test/local:${{ steps.sha_id.outputs.SHORT_SHA }}
       
   Test:
     needs: [Build]
@@ -25,5 +26,6 @@ jobs:
       - name: Test
         run: |
           echo "Tag:" ${{ needs.Build.outputs.tag }}
+          echo "Image:" ${{ needs.Build.outputs.image }}
           
           
