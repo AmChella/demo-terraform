@@ -41,7 +41,7 @@ jobs:
 
     - name: Deploy Helm Chart with Ingress Enabled
       run: |
-        helm install my-app ./helm/your-chart \
+        helm install demo demo/app \
           --set ingress.enabled=true \
           --wait
 
