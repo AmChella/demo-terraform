@@ -78,7 +78,7 @@ jobs:
 
     - name: Wait for Deployment Ready
       run: |
-        kubectl rollout status deployment/my-app --timeout=60s
+        kubectl rollout status demo/app --timeout=60s
 
     - name: Port-forward Ingress
       run: |
