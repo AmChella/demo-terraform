@@ -62,7 +62,7 @@ jobs:
           --set deployment.worker_image=2chella/tms:sha-79db0858 \
           --set localStorageClass.name=standard
 
-          kubectl get po --all-namespace
+          kubectl get po --all-namespaces
           kubectl wait --for=condition=ready pod --all --namespace=ci-local --timeout=120s
 
       - name: Port forward app
