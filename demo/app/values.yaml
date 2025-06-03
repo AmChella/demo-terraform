@@ -1,123 +1,351 @@
-# Default values for app.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+deployment:
+  name: tms
+  worker_name: tms-worker
+  version: local
+  environment: local
+  name_cron: tms-cron
+  replicas: 1
+  web_replicas: 4
+  image: tms-service:latest
+  worker_image: tms-worker
+  cpu_limit:
+    web: 4000m
+    cron: 3000m
+    worker: 3000m
+  memory_limit:
+    web: 3Gi
+    cron: 3Gi
+    worker: 3Gi
+  cpu_request:
+    web: 4000m
+    cron: 2000m
+    worker: 2000m
+  memory_request:
+    web: 2000Mi
+    cron: 2000Mi
+    worker: 2000Mi
+production:
+  enabled: true
+dependencies:
+  enabled: false
+mysql:
+  image:
+    registry: docker.io
+    repository: bitnami/mysql
+    tag: 8.0.40
+  auth:
+    rootPassword: "root%123$"
+    database: "learnship"
+    createDatabase: true
+  primary:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 1024Mi
+    persistentVolumeClaimRetentionPolicy:
+      enabled: true
+      whenDeleted: "Retain"
+    configuration: |-
+      [mysqld]
+      default_authentication_plugin=mysql_native_password
+      authentication_policy='* ,,'
+      sql_mode="NO_ENGINE_SUBSTITUTION"
+      skip-name-resolve
+      explicit_defaults_for_timestamp
+      basedir=/opt/bitnami/mysql
+      plugin_dir=/opt/bitnami/mysql/lib/plugin
+      port=3306
+      mysqlx=0
+      mysqlx_port=33060
+      socket=/opt/bitnami/mysql/tmp/mysql.sock
+      datadir=/bitnami/mysql/data
+      tmpdir=/opt/bitnami/mysql/tmp
+      max_allowed_packet=16M
+      bind-address=0.0.0.0
+      pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+      log-error=/opt/bitnami/mysql/logs/mysqld.log
+      character-set-server=UTF8
+      slow_query_log=0
+      long_query_time=10.0
 
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
-replicaCount: 1
+      [client]
+      port=3306
+      socket=/opt/bitnami/mysql/tmp/mysql.sock
+      default-character-set=UTF8
+      plugin_dir=/opt/bitnami/mysql/lib/plugin
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
-image:
-  repository: nginx
-  # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-
-# This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
-# This is to override the chart name.
-nameOverride: ""
-fullnameOverride: ""
-
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Automatically mount a ServiceAccount's API credentials?
-  automount: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-podLabels: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
-service:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  type: ClusterIP
-  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
-  port: 80
-
-# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+      [manager]
+      port=3306
+      socket=/opt/bitnami/mysql/tmp/mysql.sock
+      pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  labels:
+    app: ingress
+  enabled: true
+  name: tms-ingress
+  local:
+    className: ""
+    host: tms.learnship.local
+    annotations: {}
+    hosts:
+      - host: tms.learnship.local
+        paths:
+          - path: /(/|$)(.*)
+            pathType: ImplementationSpecific
+            servicePort: 80
+  production:
+    host: tms.learnship.com
+    className: alb
+    annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+        alb.ingress.kubernetes.io/backend-protocol: HTTP
+        alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:eu-central-1:908821207639:certificate/92f20ba2-cfdd-4717-bf67-f401b27ce853"
+        alb.ingress.kubernetes.io/group.name: learnship-prod-ingress-alb-group
+service:
+  name: tms-service
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
-
-# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
-autoscaling:
-  enabled: false
+hpa:
+  name: tms-hpa
   minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  maxReplicas: 2
 
-# Additional volumes on the output Deployment definition.
-volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
+storageclass:
+  name: tms-storageclass
 
-# Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
-# - name: foo
-#   mountPath: "/etc/foo"
-#   readOnly: true
+localStorageClass:
+  name: local-path
 
-nodeSelector: {}
+pv:
+  name: tms-pv
+  worker_name: tms-worker-pv
+  host:
+    path: /Volumes/Code/Data
 
-tolerations: []
+pvc:
+  name: tms-pvc
+  worker_name: tms-worker-pvc
 
-affinity: {}
+secret:
+  dockerSecretName: tms-dockersecret
+  dockerConfigJson:
+
+variables:
+  runtime_environment: local
+  DISABLE_LOGIN_REDIRECT: false
+  # Ticket publishing options
+  SYMFONY__JIRA_USERNAME: "lsdevjira@gmail.com"
+  SYMFONY__JIRA_PASSWORD: "$JIRA_PASSWORD"
+  SYMFONY__JIRA_REST_URL: "https://learnship-dev.atlassian.net/rest/api/2/"
+  SYMFONY__JIRA_CUSTOMFIELD_STARTDATE: "customfield_10042"
+  # Nginx basic
+  NGINX_WORKER_PROCESSES: "1"
+  NGINX_WORKER_CONNECTIONS: "10240"
+  # PHP CLI
+  PHP_TIMEZONE: "Europe/Berlin"
+  # PHP FPM
+  PHP_FPM_LOG_LEVEL: "notice"
+  PHP_FPM_MEMORY_LIMIT: "7168M"
+  PHP_FPM_XDEBUG: "true"
+  PHP_FPM_SESSION_SAVE_HANDLER: "memcached"
+  PHP_FPM_SESSION_SAVE_PATH: "tms-memcached:11211"
+  PHP_FPM_MEMCACHED_SESSION_REDUNDANCY: "1"
+  # PHP FPM pool
+  PHP_FPM_POOL_PM_MAX_CHILDREN: "60"
+  PHP_FPM_POOL_PM_START_SERVERS: "2"
+  PHP_FPM_POOL_MIN_SPARE_SERVERS: "2"
+  PHP_FPM_POOL_MAX_SPARE_SERVERS: "30"
+  PHP_FPM_POOL_MAX_REQUESTS: "180"
+  # Webserver build properties
+  SYMFONY__ENV: "dev"
+  SYMFONY__DEBUG: "true"
+  SYMFONY__DB_USER: "root"
+  SYMFONY__DB_PASSWORD: "root%123$"
+  SYMFONY__DB_NAME: "learnship"
+  SYMFONY__DB_HOST: "tms-mysql"
+  SYMFONY__DB_PORT: 3306
+  SYMFONY__CLASSROOM_LINK: "http://localhost/v2/classroom/index?id={id}"
+  SYMFONY__CLASSROOM_DEFAULT_URL_TEMPLATE: "http://localhost:8084/?id={attendee_id}"
+  SYMFONY__CLASSROOM_DEFAULT_VERSION: "local"
+  SYMFONY__DB_USER_CRON: "root"
+  SYMFONY__DB_PASSWORD_CRON: "root%123$"
+  # Assessment App
+  SYMFONY__ASSESSMENT_APP_URL: "https://devlogin.globalenglish.com/?redirectUrl={redirect}"
+  SYMFONY__ASSESSMENT_APP_URL_REDIRECT: "https://devguide.globalenglish.com/sessions/{sessionId}"
+  # Acceptance tests
+  SYMFONY__ACCEPTANCE_TEST__WD_HOST_URL: 'http://localhost:8643/wd/hub'
+  SYMFONY__ACCEPTANCE_TEST__BASE_URL: 'http://localhost'
+  SYMFONY__ACCEPTANCE_TEST__URL: "http://localhost"
+  SYMFONY__ACCEPTANCE_TEST__SELENIUM_HOST: "localhost"
+  SYMFONY__ACCEPTANCE_TEST__USERNAME: "10347@test.learnship.de"
+  SYMFONY__ACCEPTANCE_TEST__PASSWORD: "learnship"
+  # Unit tests
+  SYMFONY__TEST_DB_NAME: "learnship_test"
+  # Behavior tests
+  SYMFONY__BEHAVIOR_TEST_DB_NAME: "learnship_behavior_test"
+  # Bugsnag
+  SYMFONY__BUGSNAG__API_KEY: "dummykey"
+  SYMFONY__BUGSNAG__APP_VERSION: "local"
+  # Twilio options
+  SYMFONY__TWILIO__AUTH_TOKEN: ""
+  SYMFONY__TWILIO__SID: ""
+  SYMFONY__TWILIO__APP_ID: ""
+  SYMFONY__TWILIO__SIP_URI: "http://localhost:7000/join-session"
+  # Geolocation services (LS-186)
+  SYMFONY__GEOLOCATION_URL: "http://www.geoplugin.net/json.gp?ip={ip}"
+  # Statistics generation options (SD-7965)
+  SYMFONY__COURSE_ONLINE_REPORT_SESSION_LIMIT: 2000
+  # Hr statistics generation options
+  SYMFONY__STUDENTS_ONLINE_REPORT_COURSE_LIMIT: 50
+  SYMFONY__COURSES_ONLINE_REPORT_LIMIT: 50
+  # Stripe payment service options
+  SYMFONY__STRIPE__DE_PUBLIC_KEY: ""
+  SYMFONY__STRIPE__DE_SECRET_KEY: ""
+  SYMFONY__STRIPE__US_PUBLIC_KEY: ""
+  SYMFONY__STRIPE__US_SECRET_KEY: ""
+  SYMFONY__STRIPE__CH_PUBLIC_KEY: ""
+  SYMFONY__STRIPE__CH_SECRET_KEY: ""
+  # Excel export settings (SD-7867)
+  SYMFONY__STUDENT_EXPORT_REPORT_LIMIT: 2000
+  SYMFONY__SESSION_EXPORT_REPORT_LIMIT: 2000
+  # RabbitMQ service options
+  SYMFONY__RABBIT_MQ__HOST: "localhost"
+  SYMFONY__RABBIT_MQ__PORT: "5672"
+  SYMFONY__RABBIT_MQ__USER: "admin"
+  SYMFONY__RABBIT_MQ__PASSWORD: "Test123"
+  SYMFONY__RABBIT_MQ__VHOST: "/"
+  SYMFONY__RABBIT_MQ__CONNECTION_TIMEOUT: "3"
+  SYMFONY__RABBIT_MQ__READ_WRITE_TIMEOUT: "3"
+  SYMFONY__RABBIT_MQ__MATERIAL_CONVERSION__TMS_UPLOAD_PREFIX: "/slideshowsConverter/"
+  SYMFONY__RABBIT_MQ__MATERIAL_CONVERSION__S3_UPLOAD_PREFIX: "/converter/"
+  SYMFONY__RABBIT_MQ__MATERIAL_CONVERSION__TMS_SLIDESHOW_PREFIX: "/slides-devl/"
+  SYMFONY__RABBIT_MQ__MATERIAL_CONVERSION__S3_TARGET_PREFIX: "slides-devl"
+  SYMFONY__RABBIT_MQ__MATERIAL_CONVERSION__UPLOAD_CLEANUP: "true"
+  # Amazon S3 service options
+  SYMFONY__AWS_S3__KEY: ""
+  SYMFONY__AWS_S3__SECRET: ""
+  SYMFONY__AWS_S3__REGION: "eu-west-1"
+  SYMFONY__AWS_S3__BUCKET: "ls-devl-mcs-converter-euw1"
+  SYMFONY__AWS_S3__TARGET_KEY: ""
+  SYMFONY__AWS_S3__TARGET_SECRET: ""
+  SYMFONY__AWS_S3__TARGET_REGION: "eu-central-1"
+  SYMFONY__AWS_S3__TARGET_BUCKET: "ls-staging-mcs-slides-euc1"
+  SYMFONY__AWS_S3__PROFILEPIC_KEY: ""
+  SYMFONY__AWS_S3__PROFILEPIC_SECRET: ""
+  SYMFONY__AWS_S3__PROFILEPIC_REGION: "eu-central-1"
+  SYMFONY__AWS_S3__PROFILEPIC_BUCKET: "ls-devl-profilepics-euc1"
+  SYMFONY__AWS_S3__PROFILEPIC_PREFIX: "profile-pictures"
+  SYMFONY__AWS_S3__UPLOADS_PREFIX: ""
+  # PowerBI
+  SYMFONY__POWERBI_ENABLED: "1"
+  SYMFONY__POWERBI_USERNAME: ""
+  SYMFONY__POWERBI_PASSWORD: ""
+  SYMFONY__POWERBI_TENANT: ""
+  SYMFONY__POWERBI_CLIENT_ID: ""
+  SYMFONY__POWERBI_GROUP_ID: ""
+  SYMFONY__POWERBI_REPORTS_ATTENDANCE_AGGREGATED_REPORT_ID: ""
+  SYMFONY__POWERBI_REPORTS_ATTENDANCE_AGGREGATED_ACCESS: "all"
+  SYMFONY__POWERBI_REPORTS_ATTENDANCE_DETAILED_REPORT_ID: ""
+  SYMFONY__POWERBI_REPORTS_ATTENDANCE_DETAILED_ACCESS: "all"
+  #MS TEAM API
+  SYMFONY__MSTEAMS_API__URL: "https://tbd-zoom-api.learnship.today"
+  # GlobalEnglish
+  SYMFONY__GE__TOKEN: ""
+  SYMFONY__GE__PUBLIC_KEY_URL: "https://teacherapi.learnship.com/public-key"
+  SYMFONY__GE__SERVICE_URL: "https://teacherapi.learnship.com/"
+  SYMFONY__GE__DASHBOARD__URL: "https://teacherapi.learnship.com"
+  SYMFONY__GE__KEY: ""
+  SYMFONY__GE__EDGE__URL: "https://testedge.globalenglish.com"
+  SYMFONY__GE__EDGE__API__KEY: ""
+  SYMFONY__GE__AWS__OUP__URL: "https://zia99nqv2c.execute-api.eu-central-1.amazonaws.com/dynamic"
+  SYMFONY__GE__AWS__OUP__API__KEY: ""
+  SYMFONY__GE__AWS__SNS__ACCESS__KEY: ""
+  SYMFONY__GE__AWS__SNS__SECRET__KEY: ""
+  SYMFONY__GE__AWS__SNS__TOPIC__ARN: "arn:aws:sns:eu-central-1:162524238833:learnship-dynamic-sprint-notification"
+  SYMFONY__GE__AWS__SNS__REGION: "eu-central-1"
+  SYMFONY__GE__AWS__MESSAGING_SERVICE__URL: "https://messaging.learnship.today/tmsemails"
+  SYMFONY__GE__AWS__MESSAGING_SERVICE__TOKEN: ""
+  # GraphQL API
+  SYMFONY__GRAPHQL_API__URL: "http://availability:3000/graphql"
+  SYMFONY__GRAPHQL_API__API_KEY: "$GRAPHQL_API_KEY"
+  # OpenTok API
+  SYMFONY__CLASSROOM_API__URL: "http://webrtc-backend:3000/opentok-session-id"
+  SYMFONY__CLASSROOM_API__KEY: "$OPENTOK_API_KEY"
+  # participant-availability-tool
+  SYMFONY__PARTICIPANT_AVAILABILITY_TOOL__URL: "http://localhost:3001/"
+  # Mails
+  SYMFONY__SMTP_HOST: "email-smtp.eu-west-1.amazonaws.com"
+  SYMFONY__SMTP_USERNAME: "AKIASLVZTCPYZAM5C7EI"
+  SYMFONY__SMTP_PASSWORD: "-"
+  SYMFONY__FULFILLMENT__PUBLIC_KEY: ""
+  # AWS Cognito
+  SYMFONY__AWS_COGNITO_REGION: "eu-central-1"
+  SYMFONY__AWS_COGNITO_USERPOOL_ID: "eu-central-1_kZDylrU9a"
+  SYMFONY__AWS_COGNITO_ACCESS_KEY_ID: "$AWS_COGNITO_ACCESS_KEY_ID"
+  SYMFONY__AWS_COGNITO_SECRET_ACCESS_KEY: "$AWS_COGNITO_SECRET_ACCESS_KEY"
+  SYMFONY__AWS_COGNITO_CLIENT_ID: "$AWS_COGNITO_CLIENT_ID"
+  # AWS CloudFront
+  SYMFONY__AWS_CLOUDFRONT_KEY_PAIR_ID: "$AWS_CLOUDFRONT_KEY_PAIR_ID"
+  SYMFONY__AWS_CLOUDFRONT_PRIVATE_KEY_PATH: "$AWS_CLOUDFRONT_PRIVATE_KEY_PATH"
+  SYMFONY__AWS_CLOUDFRONT_ENCRYPTION_PASSWORD: "$AWS_CLOUDFRONT_ENCRYPTION_PASSWORD"
+
+  # NYLAS Calendar Invite
+  SYMFONY__NYLAS_API_URL: "$NYLAS_API_URL"
+  SYMFONY__NYLAS_API_ACCESS_KEY: "$NYLAS_API_ACCESS_KEY"
+  SYMFONY__NYLAS_API_CALENDAR_ID: "$NYLAS_API_CALENDAR_ID"
+  SYMFONY__NYLAS_API_GRANT_ID: "$NYLAS_API_GRANT_ID"
+  # OSCAR API
+  SYMFONY__OSCAR_API__URL: "https://84a027h2h5.execute-api.eu-central-1.amazonaws.com/dynamic"
+  SYMFONY__OSCAR_API__AUTH_TOKEN: "$OSCAR_API__AUTH_TOKEN"
+  # Salesforce API
+  SYMFONY__SALESFORCE_API__URL: "https://hbani68br3.execute-api.eu-central-1.amazonaws.com/staging/webhook"
+  SYMFONY__SALESFORCE_API__TOKEN: ""
+  # SSO app configs
+  SYMFONY__SSO__APP_URL: "https://login.learnship.tech/"
+  SYMFONY__IBAN_API_KEY: "$SYMFONY__IBAN_API_KEY"
+  SYMFONY__IBAN_API_URL: "https://api.iban.com/clients/api/v4/iban/"
+  SYMFONY__POWERBI_REPORTS_TRAINER_LED_COURSE_REPORT_ID: ""
+  SYMFONY__POWERBI_REPORTS_TRAINER_LED_COURSE_ACCESS: "all"
+  SYMFONY__POWERBI_REPORTS_TEST_RESULTS_REPORT_ID: ""
+  SYMFONY__POWERBI_REPORTS_TEST_RESULTS_ACCESS: "all"
+  SYMFONY__POWERBI_REPORTS_TRAINER_LED_COURSE_FILTER_TABLE_NAME: "DimOrga"
+  SYMFONY__POWERBI_REPORTS_TRAINER_LED_COURSE_FILTER_COLUMN_NAME: "Organisation"
+  SYMFONY__POWERBI_REPORTS_TEST_RESULTS_FILTER_TABLE_NAME: "DimOrganisation"
+  SYMFONY__POWERBI_REPORTS_TEST_RESULTS_FILTER_COLUMN_NAME: "Organisation"
+  # TMS cookie domain settings
+  SYMFONY__COOKIE_DOMAIN_NAME: ""
+  # Home API Menu
+  SYMFONY__MENU_LOGO_URL: "https://logos.learnship.tech/lslogo-03oct/"
+  DD_APP_ID: ""
+  DD_CLIENT_TOKEN: ""
+  DD_DBM_PROPAGATION_MODE : "full"
+  DD_ENV: local
+  DD_LOGS_INJECTION: true
+  DD_SERVICE: tms
+  DD_VERSION: latest
+  NGINX_ENABLE_VHOST_S3_PROXY_PASS: "On"
+  TMS_API_BASE_URL: "https://tms.learnship.local"
+  VERSION: latest
+  SYMFONY__JIRA_RESUME: 711
+  SYMFONY__PORTAL_REPLACE_HOSTNAME: "1"
+  SYMFONY__JIRA_REOPENED: 3
+  SYMFONY__JIRA_OPEN: 741
+  SYMFONY__JIRA_ONHOLD: 721
+  SYMFONY__JIRA_CLOSE: 2
+  # secrets will be updated to null after testing
+  SYMFONY__STREAMNATIVE_CLIENT_ID: ""
+  SYMFONY__STREAMNATIVE_CLIENT_SECRET : ""
+  SYMFONY__STREAMNATIVE_CLIENT_EMAIL: "admin@o-fg4e1.auth.streamnative.cloud"
+  SYMFONY__STREAMNATIVE_ISSUER_URL : "https://auth.streamnative.cloud/"
+  SYMFONY__STREAMNATIVE_AUDIENCE: "urn:sn:pulsar:o-fg4e1:prod-pulsar-messaging"
+  SYMFONY__STREAMNATIVE_METADATA_BROKER_LIST: "kafka:9092"
+  SYMFONY__STREAMNATIVE_SECURITY_PROTOCOL: "SASL_SSL"
+  SYMFONY__STREAMNATIVE_MECHANISM: "PLAIN"
+  SYMFONY__STREAMNATIVE_USERNAME: "TM-testing"
+  SYMFONY__STREAMNATIVE_BOOTSTRAP_SERVERS: "pc-c0f67a11.aws-euc1-prod-snci-pool-slug.streamnative.aws.snio.cloud:9093"
+

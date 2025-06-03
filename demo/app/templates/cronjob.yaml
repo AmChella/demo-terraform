@@ -2,18 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: {{ .Values.deployment.name }}
+    app: {{ .Values.deployment.name_cron }}
     tags.datadoghq.com/version: {{ .Values.deployment.version }}
-    tags.datadoghq.com/service: "tms"
+    tags.datadoghq.com/service: "tms-cron"
     tags.datadoghq.com/env: {{ .Values.environment }}
-  name:  {{ .Values.deployment.name }}
+  name:  {{ .Values.deployment.name_cron }}
 spec:
   progressDeadlineSeconds: 600
-  replicas: {{ .Values.deployment.web_replicas }}
+  replicas: {{ .Values.deployment.replicas }}
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: {{ .Values.deployment.name }}
+      app: {{ .Values.deployment.name_cron }}
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -23,9 +23,9 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: {{ .Values.deployment.name }}
+        app: {{ .Values.deployment.name_cron }}
         tags.datadoghq.com/version: {{ .Values.deployment.version }}
-        tags.datadoghq.com/service: "tms"
+        tags.datadoghq.com/service: "tms-cron"
         tags.datadoghq.com/env: {{ .Values.environment }}
       annotations:
         reloader.stakater.com/auto: "true"
@@ -42,16 +42,14 @@ spec:
               apiVersion: v1
               fieldPath: metadata.name
         - name: CRON_ENABLED
-          value: "false"
-        - name: DISABLE_LOGIN_REDIRECT
-          value: {{ .Values.variables.DISABLE_LOGIN_REDIRECT | quote }}
+          value: "true"
         - name: SYMFONY__DB_USER
-          value: {{ .Values.variables.SYMFONY__DB_USER | quote }}
+          value: {{ .Values.variables.SYMFONY__DB_USER_CRON | quote }}
         - name: SYMFONY__DB_PASSWORD
-          value: {{ .Values.variables.SYMFONY__DB_PASSWORD | quote }}
+          value: {{ .Values.variables.SYMFONY__DB_PASSWORD_CRON | quote }}
         - name: DD_SERVICE
-          value: "tms"
-        {{- include "tms.appVariables" . | nindent 8 }}
+          value: "tms-cron"
+        {{ include "tms.appVariables" . | nindent 8 }}
         image: {{ .Values.deployment.image }}
         imagePullPolicy: Always
         name: {{ .Values.deployment.name }}
@@ -71,12 +69,13 @@ spec:
           protocol: TCP
         resources:
           limits:
-            cpu: {{ .Values.deployment.cpu_limit.web }}
-            memory: {{ .Values.deployment.memory_limit.web }}
+            cpu: {{ .Values.deployment.cpu_limit.cron }}
+            memory: {{ .Values.deployment.memory_limit.cron }}
           requests:
-            cpu: {{ .Values.deployment.cpu_request.web }}
-            memory: {{ .Values.deployment.memory_request.web }}
+            cpu: {{ .Values.deployment.cpu_request.cron }}
+            memory: {{ .Values.deployment.memory_request.cron }}
       nodeSelector:
         kubernetes.io/os: linux
       imagePullSecrets:
         - name : docker-secret
+

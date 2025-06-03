@@ -1,15 +1,22 @@
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
-  name: {{ include "app.fullname" . }}
+  name:  {{ .Values.service.name }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.service.name }}
+    tags.datadoghq.com/version: {{ .Values.deployment.version }}
+    tags.datadoghq.com/service: "tms"
+    tags.datadoghq.com/env: {{ .Values.dd_environment }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+  type: ClusterIP
   selector:
-    {{- include "app.selectorLabels" . | nindent 4 }}
+    app:  {{ .Values.deployment.name }}
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443

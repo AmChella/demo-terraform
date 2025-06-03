@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.deployment.worker_name }}
+    tags.datadoghq.com/version: {{ .Values.deployment.packageJsonVersion }}
+    tags.datadoghq.com/service: "tms-worker"
+    tags.datadoghq.com/env: {{ .Values.dd_environment }}
+  name:  {{ .Values.deployment.worker_name }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.deployment.replicas }}
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.worker_name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: {{ .Values.deployment.worker_name }}
+        tags.datadoghq.com/version: {{ .Values.deployment.packageJsonVersion }}
+        tags.datadoghq.com/service: "tms-worker"
+        tags.datadoghq.com/env: {{ .Values.dd_environment }}
+      annotations:
+        reloader.stakater.com/auto: "true"
+    spec:
+      containers:
+      - env:
+        - name: {{ .Values.deployment.worker_name }}
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: SYMFONY__DB_USER
+          value: {{ .Values.variables.SYMFONY__DB_USER | quote }}
+        - name: SYMFONY__DB_PASSWORD
+          value: {{ .Values.variables.SYMFONY__DB_PASSWORD | quote }}
+        - name: DD_SERVICE
+          value: "tms-worker"
+          {{- include "tms.appVariables" . | nindent 8 }}
+        image: {{ .Values.deployment.worker_image | quote }}
+        imagePullPolicy: Always
+        name: {{ .Values.deployment.worker_name }}
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.cpu_limit.worker }}
+            memory: {{ .Values.deployment.memory_limit.worker }}
+          requests:
+            cpu: {{ .Values.deployment.cpu_request.worker }}
+            memory: {{ .Values.deployment.memory_request.worker }}
+      nodeSelector:
+        kubernetes.io/os: linux 
+      imagePullSecrets:
+        - name : docker-secret
