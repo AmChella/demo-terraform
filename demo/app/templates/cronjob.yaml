@@ -5,7 +5,7 @@ metadata:
     app: {{ .Values.deployment.name_cron }}
     tags.datadoghq.com/version: {{ .Values.deployment.version }}
     tags.datadoghq.com/service: "tms-cron"
-    tags.datadoghq.com/env: {{ .Values.environment }}
+    tags.datadoghq.com/env: {{ .Values.deployment.environment }}
   name:  {{ .Values.deployment.name_cron }}
 spec:
   progressDeadlineSeconds: 600
@@ -26,7 +26,7 @@ spec:
         app: {{ .Values.deployment.name_cron }}
         tags.datadoghq.com/version: {{ .Values.deployment.version }}
         tags.datadoghq.com/service: "tms-cron"
-        tags.datadoghq.com/env: {{ .Values.environment }}
+        tags.datadoghq.com/env: {{ .Values.deployment.environment }}
       annotations:
         reloader.stakater.com/auto: "true"
     spec:

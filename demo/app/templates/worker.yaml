@@ -5,7 +5,7 @@ metadata:
     app: {{ .Values.deployment.worker_name }}
     tags.datadoghq.com/version: {{ .Values.deployment.packageJsonVersion }}
     tags.datadoghq.com/service: "tms-worker"
-    tags.datadoghq.com/env: {{ .Values.dd_environment }}
+    tags.datadoghq.com/env: {{ .Values.deployment.environment }}
   name:  {{ .Values.deployment.worker_name }}
 spec:
   progressDeadlineSeconds: 600
@@ -26,7 +26,7 @@ spec:
         app: {{ .Values.deployment.worker_name }}
         tags.datadoghq.com/version: {{ .Values.deployment.packageJsonVersion }}
         tags.datadoghq.com/service: "tms-worker"
-        tags.datadoghq.com/env: {{ .Values.dd_environment }}
+        tags.datadoghq.com/env: {{ .Values.deployment.environment }}
       annotations:
         reloader.stakater.com/auto: "true"
     spec:
@@ -58,6 +58,6 @@ spec:
             cpu: {{ .Values.deployment.cpu_request.worker }}
             memory: {{ .Values.deployment.memory_request.worker }}
       nodeSelector:
-        kubernetes.io/os: linux 
+        kubernetes.io/os: linux
       imagePullSecrets:
         - name : docker-secret

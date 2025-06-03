@@ -6,7 +6,7 @@ metadata:
     app: {{ .Values.service.name }}
     tags.datadoghq.com/version: {{ .Values.deployment.version }}
     tags.datadoghq.com/service: "tms"
-    tags.datadoghq.com/env: {{ .Values.dd_environment }}
+    tags.datadoghq.com/env: {{ .Values.deployment.environment }}
 spec:
   type: ClusterIP
   selector:
