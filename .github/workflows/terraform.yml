@@ -7,94 +7,74 @@ on:
     branches: [main]
 
 jobs:
-  deploy:
-    name: Deploy to Kind
-    runs-on: ubuntu-latest
-
+  e2e:
+    name: E2E Test
+    runs-on: self-hosted
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up kind cluster
-      uses: helm/kind-action@v1.8.0
-      with:
-        node_image: kindest/node:v1.27.3
+      - name: Extract Short SHA and Label
+        id: version
+        uses: learnship/version-action@132cb6f241968b60a01dbdc9233cfd0a64cad652
 
-    - name: Set up Helm
-      uses: azure/setup-helm@v3
-      with:
-        version: v3.14.0
+      - name: Install Kind
+        run: |
+          curl -Lo kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+          chmod +x kind
+          sudo mv kind /usr/local/bin/kind
 
-    - name: Install Ingress Controller
-      run: |
-        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-        helm repo update
-        helm install ingress-nginx ingress-nginx/ingress-nginx \
-          --namespace ingress-nginx \
-          --create-namespace \
-          --set controller.publishService.enabled=true
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/v1.33.1/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/kubectl
 
-        kubectl wait --namespace ingress-nginx \
-          --for=condition=Ready pod \
-          --selector=app.kubernetes.io/component=controller \
-          --timeout=120s
+      - name: Install Helm
+        run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-    - name: Deploy Helm Chart with Ingress Enabled
-      run: |
-        helm install demo demo/app \
-          --set ingress.enabled=true \
-          --wait
+      - name: Create Kind cluster with port mapping for Ingress
+        run: |
+          cat <<EOF | kind create cluster --config=-
+          kind: Cluster
+          apiVersion: kind.x-k8s.io/v1alpha4
+          nodes:
+            - role: control-plane
+              extraPortMappings:
+                - containerPort: 80
+                  hostPort: 80
+          EOF
 
-        kubectl get ingress -A
+      - name: Deploy app with Helm (uses pre-configured ingress)
+        run: |
+          mkdir -p /tmp/Data
+          helm install tms helm/tms \
+          --namespace ci-local --create-namespace \
+          --set variables.DISABLE_LOGIN_REDIRECT=true \
+          --set dependencies.enabled=true \
+          --set production.enabled=false \
+          --set deployment.web_replicas=1 \
+          --set deployment.cpu_limit.cron=500m \
+          --set deployment.cpu_request.cron=500m \
+          --set deployment.cpu_limit.web=500m \
+          --set deployment.cpu_request.web=500m \
+          --set pv.host.path=/tmp/Data \
+          --set deployment.image=2chella/tms:sha-79db0858 \
+          --set deployment.worker_image=2chella/tms:sha-79db0858 \
+          --set localStorageClass.name=standard
 
-    - name: Save kubeconfig
-      run: |
-        cp $HOME/.kube/config kubeconfig
-      shell: bash
+          kubectl wait --for=condition=ready pod --all --namespace=ci-local --timeout=120s
 
-    - name: Upload kubeconfig
-      uses: actions/upload-artifact@v4
-      with:
-        name: kubeconfig
-        path: kubeconfig
+      - name: Port forward app
+        run: |
+          kubectl port-forward svc/tms-service 80:80 -n ci-local &
+          sleep 5
 
-  test:
-    name: Run Cypress Tests
-    needs: deploy
-    runs-on: ubuntu-latest
+      - name: Add custom domain to /etc/hosts
+        run: |
+          echo "127.0.0.1 tms.learnship.local" | sudo tee -a /etc/hosts
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Download kubeconfig
-      uses: actions/download-artifact@v4
-      with:
-        name: kubeconfig
-        path: $HOME/.kube/
-
-    - name: Set kubeconfig env
-      run: echo "KUBECONFIG=$HOME/.kube/kubeconfig" >> $GITHUB_ENV
-
-    - name: Wait for Deployment Ready
-      run: |
-        kubectl rollout status demo/app --timeout=60s
-
-    - name: Port-forward Ingress
-      run: |
-        kubectl port-forward --namespace ingress-nginx \
-          service/ingress-nginx-controller 8080:80 &
-        sleep 10
-
-    - name: Set up Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-
-    - name: Install Cypress and Dependencies
-      run: npm ci  # or `npm install` based on your setup
-
-    - name: Run Cypress Tests
-      env:
-        CYPRESS_baseUrl: http://localhost:8080
-      run: npx cypress run
+      - name: Set up Cypress environment
+        working-directory: test/tmsRegression
+        run: |
+          kubectl get po -n ci-local
+          curl http://tms.learnship.local
