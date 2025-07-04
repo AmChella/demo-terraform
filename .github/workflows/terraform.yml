@@ -7,11 +7,40 @@ on:
     branches: [main]
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      containerCount: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Generate matrix from test files
+        id: set-matrix
+        run: |
+          matrix="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            matrix="[1]"
+          fi
+          echo "containerCount=$containerCount" >> $GITHUB_OUTPUT
+
   e2e:
     name: E2E Test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        container: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    environment: e2e
+    env:
+      IMAGE_NAME: gedevops/tms
+    outputs:
+      allowedTags: ${{ steps.get-tags.outputs.allowedTags }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          repository: learnship/tms
 
       - name: Start minikube
         uses: medyagh/setup-minikube@latest
