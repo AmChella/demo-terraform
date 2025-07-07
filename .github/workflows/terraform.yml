@@ -5,6 +5,7 @@ name: Helm + Cypress CI
 on:
   push:
     branches: [main]
+  pull_request:
 
 jobs:
   find-ref:
@@ -18,6 +19,6 @@ jobs:
       - name: Generate matrix from test files
         id: set-matrix
         run: |
-          echo ${{ github.ref }}
+          echo "Ref : " ${{ github.ref }} "Event Name: " ${{ github.event_name }}
 
   
