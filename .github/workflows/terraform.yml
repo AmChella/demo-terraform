@@ -18,6 +18,6 @@ jobs:
       - name: Generate matrix from test files
         id: set-matrix
         run: |
-          echo github.ref
+          echo ${{ github.ref }}
 
   
